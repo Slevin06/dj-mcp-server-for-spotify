@@ -1,0 +1,17 @@
+# 環境変数と認証情報
+.env
+spotify_token.json
+
+# Python関連
+__pycache__/
+*.pyc
+venv/
+
+# エディタ関連
+.vscode/
+.cursor/
+.idea/
+
+# システム関連
+.DS_Store
+Thumbs.db 
