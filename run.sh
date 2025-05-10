@@ -83,12 +83,12 @@ echo "You can access the server at http://127.0.0.1:8000"
 echo "To authenticate, open your browser and go to: http://127.0.0.1:8000/auth/login"
 echo "Press Ctrl+C to stop the server."
 
-if ! uv uvicorn main:app --host 0.0.0.0 --port 8000; then
+if ! uv uvicorn src.main:app --host 0.0.0.0 --port 8000; then
     echo -e "\n${RED}Failed to start the server with uv uvicorn.${NC}"
     echo "Trying with python -m uvicorn..."
-    if ! python3 -m uvicorn main:app --host 0.0.0.0 --port 8000; then
+    if ! python3 -m uvicorn src.main:app --host 0.0.0.0 --port 8000; then
         echo -e "\n${RED}Failed to start the server with python -m uvicorn as well.${NC}"
-        echo "Please check your main.py and uvicorn installation."
+        echo "Please check your src/main.py and uvicorn installation."
         exit 1
     fi
 fi 

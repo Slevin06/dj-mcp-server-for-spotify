@@ -89,16 +89,16 @@ echo You can access the server at http://127.0.0.1:8000
 echo To authenticate, open your browser and go to: http://127.0.0.1:8000/auth/login
 echo Press Ctrl+C in this window to stop the server.
 
-uv uvicorn main:app --host 0.0.0.0 --port 8000
+uv uvicorn src.main:app --host 0.0.0.0 --port 8000
 if errorlevel 1 (
     echo.
     echo Failed to start the server with uv uvicorn.
     echo Trying with python -m uvicorn...
-    python -m uvicorn main:app --host 0.0.0.0 --port 8000
+    python -m uvicorn src.main:app --host 0.0.0.0 --port 8000
     if errorlevel 1 (
         echo.
         echo Failed to start the server with python -m uvicorn as well.
-        echo Please check your main.py and uvicorn installation.
+        echo Please check your src\main.py and uvicorn installation.
         pause
         exit /b 1
     )
