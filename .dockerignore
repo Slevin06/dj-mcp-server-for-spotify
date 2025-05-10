@@ -1,0 +1,13 @@
+# .dockerignoreファイルの内容
+Dockerfile
+.dockerignore
+.git
+.gitignore
+.env
+spotify_token.json
+venv/
+__pycache__/
+*.pyc
+.vscode/
+README.md
+docker-compose.yml 

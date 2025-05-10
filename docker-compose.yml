@@ -1,0 +1,16 @@
+# docker-compose.yml
+version: "3.8"
+
+services:
+  spotify-mcp:
+    build:
+      context: .
+    container_name: dj_mcp_server_for_spotify
+    ports:
+      - "8000:8000"
+    volumes:
+      # spotify_token.json をホストPCの ./tokens ディレクトリに永続化
+      - ./tokens/spotify_token.json:/app/tokens/spotify_token.json
+    env_file:
+      - .env
+    restart: unless-stopped
