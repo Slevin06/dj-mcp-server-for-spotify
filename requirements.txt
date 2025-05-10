@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+spotipy
+fastapi-mcp
+pydantic
+python-dotenv 

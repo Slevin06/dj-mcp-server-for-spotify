@@ -1,91 +1,74 @@
-# DJ MCP Server for Spotify
+# 個人専用 DJ Spotify MCP Server（Docker 対応・拡張機能版）
 
-AI エージェントから Spotify を操作するための個人用 MCP サーバー
+Spotify API を MCP（Model Context Protocol）サーバーとして公開し、AI アシスタント（Claude、Cursor など）から操作できるようにするプロジェクトです。このバージョンには、再生コントロール、アーティスト検索、気分に基づくプレイリスト生成など多くの拡張機能が含まれています。Docker Compose を利用して環境構築の再現性を高めています。
 
-## 概要
+## セットアップ手順
 
-DJ MCP Server for Spotify は、個人用 Spotify MCP（Model Context Protocol）サーバーです。AI アシスタントから Spotify の機能を操作するためのインターフェースを提供します。
+**非エンジニアの方や、より詳細なステップバイステップのセットアップ手順が必要な方は、こちらの[簡単セットアップガイド (SETUP_GUIDE.md)](SETUP_GUIDE.md)をご覧ください。** このガイドでは、スクリプト (`run.sh` / `run.bat`) を使用した簡単なセットアップ方法を解説しています。
 
-このアプリケーションは Spotify の公式製品ではなく、Spotify API を利用した個人用のサードパーティアプリケーションです。Spotify および Spotify ロゴは Spotify AB の登録商標です。
+### Docker を使用する場合（推奨）
 
-## 機能
+Docker を使用すると、環境構築が簡単になり、再現性も高まります。
 
-- プレイリスト管理：閲覧、作成、編集
-- 楽曲検索：曲名、アーティスト名による検索
-- 再生コントロール：再生、一時停止、スキップ
-- レコメンデーション機能：気分や状況に基づいた曲の提案
+1.  Docker と Docker Compose をインストールしてください。
+2.  このリポジトリをクローンします:
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/dj-mcp-server-for-spotify.git
+    cd dj-mcp-server-for-spotify
+    ```
+    _(注意: `YOUR_USERNAME/dj-mcp-server-for-spotify.git` は実際のリポジトリの URL に置き換えてください。)_
+3.  プロジェクトルートに `.env.example` を参考に `.env` ファイルを作成し、Spotify API のキー情報を設定します。詳細は [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/) を確認してください。
+    - `SPOTIFY_CLIENT_ID`: あなたの Client ID
+    - `SPOTIFY_CLIENT_SECRET`: あなたの Client Secret
+    - `SPOTIFY_REDIRECT_URI`: `http://127.0.0.1:8000/callback` (Spotify Developer Dashboard にもこの URI を登録)
+4.  Docker Compose でサーバーを起動します:
+    ```bash
+    docker-compose up --build
+    ```
+5.  初回のみ、ウェブブラウザで `http://127.0.0.1:8000/auth/login` にアクセスして Spotify 認証を行います。
+6.  AI アシスタントで MCP サーバーとして `http://127.0.0.1:8000/mcp` を設定します。
 
-## セットアップ方法
+> **注意:** Spotify はリダイレクト URI に `localhost` ではなく `127.0.0.1` の使用を推奨しています。
 
-1. リポジトリをクローン
+### Docker を使用しない場合
 
-   ```bash
-   git clone https://github.com/ユーザー名/dj-mcp-server-for-spotify.git
-   cd dj-mcp-server-for-spotify
-   ```
+Docker を使用しないセットアップ方法については、[簡単セットアップガイド (SETUP_GUIDE.md)](SETUP_GUIDE.md) を参照してください。このガイドでは、必要なツールのインストールからサーバーの起動までを詳しく説明しています。
 
-2. 環境変数ファイルの設定
-   `.env.example`ファイルをコピーして`.env`ファイルを作成し、必要な情報を入力してください：
+## 主な機能
 
-   ```bash
-   cp .env.example .env
-   # その後、エディタで.envファイルを開いて編集してください
-   ```
+### プレイリスト管理
 
-   または以下の内容で`.env`ファイルをプロジェクトルートに手動で作成してください：
+- プレイリスト一覧取得 `/my-playlists`
+- プレイリスト内の曲一覧取得 `/playlists/{playlist_id}/tracks`
+- プレイリスト作成 `/create-playlist`
+- プレイリストへの曲追加 `/add-tracks-to-playlist`
+- プレイリスト内の曲順変更 `/playlists/{playlist_id}/reorder`
 
-   ```
-   # Spotify API認証情報
-   SPOTIFY_CLIENT_ID=your_client_id_here
-   SPOTIFY_CLIENT_SECRET=your_client_secret_here
-   SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/callback
+### 検索機能
 
-   # サーバー設定
-   HOST=0.0.0.0
-   PORT=8000
+- 曲検索 `/search-tracks`
+- アーティスト検索 `/search-artists`
+- アーティスト情報取得 `/artists/{artist_id}`
+- アーティストの人気曲取得 `/artists/{artist_id}/top-tracks`
 
-   # 開発環境設定
-   DEBUG=True
+### 再生コントロール
 
-   # トークン保存先
-   TOKEN_PATH=./tokens
-   ```
+- 現在再生中の曲情報取得 `/now-playing`
+- 再生開始/再開 `/player/play`
+- 一時停止 `/player/pause`
+- 次の曲へスキップ `/player/next`
+- 前の曲へ戻る `/player/previous`
+- シャッフルモード切替 `/player/shuffle`
+- 利用可能デバイス一覧取得 `/player/devices`
 
-3. Spotify Developer Dashboard で取得した Client ID と Client Secret を設定してください。
+### レコメンデーション
 
-## .env.example ファイルについて
+- 気分に基づくプレイリスト生成 `/recommendations/generate-playlist`
+  - 対応する気分: happy, sad, energetic, calm, focus, party, relax
 
-このプロジェクトには`.env.example`ファイルが含まれています。これは環境変数のテンプレートで、実際の認証情報は含まれていません。新規ユーザーはこのファイルをコピーして`.env`として使用し、自身の認証情報を設定してください。
+## 注意点
 
-`.env.example`の内容：
-
-```
-# Spotify API認証情報
-SPOTIFY_CLIENT_ID=your_client_id_here
-SPOTIFY_CLIENT_SECRET=your_client_secret_here
-SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/callback
-
-# サーバー設定
-HOST=0.0.0.0
-PORT=8000
-
-# 開発環境設定
-DEBUG=True
-
-# トークン保存先
-TOKEN_PATH=./tokens
-```
-
-## データの取り扱いについて
-
-このアプリケーションは、Spotify API から取得した以下のデータを変更せずにそのまま提供します：
-
-- トラック、アーティスト、プレイリスト、アルバムのメタデータ
-- アルバムアートワーク
-- 再生状態と制御情報
-
-Spotify のコンテンツを表示する際は、常に Spotify の帰属表示（ロゴまたはアイコン）を含め、提供元が Spotify であることを明示します。
-
-## 免責事項
-
-このアプリケーションは Spotify の公式アプリケーションではありません。Spotify API の利用に関しては、Spotify Developer Terms of Service に従います。
+- このサーバーは個人利用に最適化されています。
+- Spotify への認証は一度だけ行えば、トークンが自動的に更新されます。
+- サーバーを再起動しても認証状態は保持されます（Docker 環境ではボリュームマウントにより永続化されます。スクリプト実行の場合もローカルにトークンファイルが保存されます）。
+- 再生コントロール機能を使うには、アクティブな Spotify クライアントが必要です。
