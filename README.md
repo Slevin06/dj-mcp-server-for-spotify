@@ -13,10 +13,9 @@ Docker を使用すると、環境構築が簡単になり、再現性も高ま�
 1.  Docker と Docker Compose をインストールしてください。
 2.  このリポジトリをクローンします:
     ```bash
-    git clone https://github.com/YOUR_USERNAME/dj-mcp-server-for-spotify.git
+    git clone https://github.com/Slevin06/dj-mcp-server-for-spotify.git
     cd dj-mcp-server-for-spotify
     ```
-    _(注意: `YOUR_USERNAME/dj-mcp-server-for-spotify.git` は実際のリポジトリの URL に置き換えてください。)_
 3.  プロジェクトルートに `.env.example` を参考に `.env` ファイルを作成し、Spotify API のキー情報を設定します。詳細は [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/) を確認してください。
     - `SPOTIFY_CLIENT_ID`: あなたの Client ID
     - `SPOTIFY_CLIENT_SECRET`: あなたの Client Secret

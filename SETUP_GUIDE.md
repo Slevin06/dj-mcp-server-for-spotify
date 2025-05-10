@@ -57,7 +57,7 @@ Python は、サーバープログラムを実行するためのプログラミ�
    - Windows: `mkdir %USERPROFILE%\Desktop\SpotifyServer && cd %USERPROFILE%\Desktop\SpotifyServer`
 3. 次のコマンドを実行して、プロジェクトファイルをダウンロードします:
    ```bash
-   git clone https://github.com/USERNAME/dj-mcp-server-for-spotify.git
+   git clone https://github.com/Slevin06/dj-mcp-server-for-spotify.git
    ```
    **(注意: `USERNAME/dj-mcp-server-for-spotify.git` の部分は実際のリポジトリの URL に置き換えてください。このガイドでは仮の URL です。)**
 4. ダウンロードが完了したら、プロジェクトフォルダに移動します:
