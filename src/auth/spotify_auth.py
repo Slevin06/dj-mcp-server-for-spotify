@@ -280,8 +280,61 @@ class SpotifyAuth:
         try:
             # キャッシュをクリア
             self.cache_manager.clear_all_cache()
-            logger.info("認証関連キャッシュをクリアしました。")
+            logger.info("認証関連のキャッシュ（トークン）を削除しました。")
             return True
         except Exception as e:
             logger.error(f"キャッシュクリア中にエラーが発生しました: {e}")
-            return False 
+            return False
+
+# グローバルなSpotifyAuthインスタンス
+# ユーザーが .env ファイルで設定する想定。起動時にインスタンス化される。
+spotify_auth = SpotifyAuth()
+
+# 依存性注入用の関数 (FastAPIのDependsで使用)
+from fastapi import Depends, HTTPException # HTTPExceptionをインポート
+import spotipy # spotipyをインポート
+from typing import Optional # Optionalをインポート
+
+async def get_spotify_client() -> spotipy.Spotify: # 返り値の型ヒントを修正
+    """認証済みのSpotifyクライアントを取得する (FastAPI Depends用)
+    
+    Raises:
+        HTTPException: 認証されていない場合に401エラー
+    
+    Returns:
+        spotipy.Spotify: 認証済みSpotifyクライアント
+    """
+    # グローバルインスタンスのクライアント取得メソッドを利用
+    sp_client = spotify_auth.get_spotify_client()
+    if not sp_client:
+        # 認証エンドポイントのパスを修正
+        raise HTTPException(status_code=401, detail="Spotifyに認証されていません。/auth/login にアクセスして認証してください。")
+    return sp_client
+
+async def get_current_user(client: spotipy.Spotify = Depends(get_spotify_client)) -> Optional[dict]:
+    """現在のユーザー情報を取得する (FastAPI Depends用)
+
+    Args:
+        client (spotipy.Spotify, optional): 認証済みSpotifyクライアント. Defaults to Depends(get_spotify_client).
+
+    Returns:
+        Optional[dict]: ユーザープロファイル情報、または取得失敗時はNone。
+    """
+    try:
+        user_profile = client.me()
+        if user_profile:
+            return user_profile
+        else:
+            # sp.me() が None を返すケースは通常ないが、念のため
+            logger.warning("sp.me() が None を返しました。")
+            return None
+    except spotipy.exceptions.SpotifyException as e:
+        logger.error(f"Spotify APIエラー (ユーザー情報取得): {e}")
+        # 認証関連のエラー（例：トークン無効）であれば401を返す
+        if e.http_status == 401:
+            raise HTTPException(status_code=401, detail=f"Spotify認証エラー: {e.msg}")
+        # その他のAPIエラー
+        raise HTTPException(status_code=e.http_status if e.http_status else 500, detail=f"Spotify APIエラー: {e.msg}")
+    except Exception as e:
+        logger.error(f"ユーザー情報の取得中に予期せぬエラーが発生しました: {e}")
+        raise HTTPException(status_code=500, detail="ユーザー情報の取得中に予期せぬエラーが発生しました") 
