@@ -37,33 +37,50 @@ Docker を使用しないセットアップ方法については、[簡単セッ
 
 ### プレイリスト管理
 
-- プレイリスト一覧取得 `/my-playlists`
+- プレイリスト一覧取得 `/playlists/me`
 - プレイリスト内の曲一覧取得 `/playlists/{playlist_id}/tracks`
-- プレイリスト作成 `/create-playlist`
-- プレイリストへの曲追加 `/add-tracks-to-playlist`
-- プレイリスト内の曲順変更 `/playlists/{playlist_id}/reorder`
+- プレイリスト作成 `/playlists`
+- プレイリストへの曲追加 `/playlists/{playlist_id}/tracks`
+- プレイリスト内の曲順変更 `/playlists/{playlist_id}/tracks/reorder`
 
 ### 検索機能
 
-- 曲検索 `/search-tracks`
-- アーティスト検索 `/search-artists`
-- アーティスト情報取得 `/artists/{artist_id}`
-- アーティストの人気曲取得 `/artists/{artist_id}/top-tracks`
+- 曲検索 `/search/tracks`
+- アーティスト検索 `/search/artists`
+- アーティスト情報取得 `/search/artists/{artist_id}`
+- アーティストの人気曲取得 `/search/artists/{artist_id}/top-tracks`
+- 複数の曲情報を一度に取得 `/search/tracks/get-multiple`
 
 ### 再生コントロール
 
-- 現在再生中の曲情報取得 `/now-playing`
+- 現在再生中の曲情報取得 `/player/now-playing`
 - 再生開始/再開 `/player/play`
 - 一時停止 `/player/pause`
 - 次の曲へスキップ `/player/next`
 - 前の曲へ戻る `/player/previous`
 - シャッフルモード切替 `/player/shuffle`
+- リピートモード設定 `/player/repeat`
+- 音量設定 `/player/volume`
 - 利用可能デバイス一覧取得 `/player/devices`
+- 再生デバイス切り替え `/player/transfer`
+- 再生キューに追加 `/player/queue`
+- 再生位置を移動 `/player/seek`
 
 ### レコメンデーション
 
-- 気分に基づくプレイリスト生成 `/recommendations/generate-playlist`
-  - 対応する気分: happy, sad, energetic, calm, focus, party, relax
+- 利用可能なジャンル（カテゴリ）一覧取得 `/recommendations/genres`
+- 気分に基づくレコメンド取得 `/recommendations/by-mood`
+  - 対応する気分: happy, sad, energetic, calm, focus, party, relax, sleep, workout, romantic, studying, upbeat, mellow
+- カテゴリ（ジャンル）に基づくレコメンド取得 `/recommendations/by-category`
+- アーティストに基づくレコメンド取得 `/recommendations/by-artist`
+- レコメンドからプレイリスト作成 `/recommendations/generate-playlist`
+- レコメンドして即時再生 `/recommendations/play-recommendations`
+
+### 複合機能
+
+- 気分に基づく曲の検索・視聴・プレイリスト作成（`/recommendations/by-mood` + プレイリスト作成オプション + 再生機能）
+- カテゴリ指定による視聴・プレイリスト作成（`/recommendations/by-category` + プレイリスト作成オプション + 再生機能）
+- アーティスト指定による視聴・プレイリスト作成（`/recommendations/by-artist` + プレイリスト作成オプション + 再生機能）
 
 ## 注意点
 
