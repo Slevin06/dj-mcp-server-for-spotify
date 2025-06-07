@@ -39,7 +39,9 @@ class SearchManager:
         Raises:
             HTTPException: API呼び出しに失敗した場合
         """
-        cache_key = f"search_tracks_{query}_{limit}"
+        # limitを確実にintに変換
+        limit_int = int(limit) if limit is not None else 10
+        cache_key = f"search_tracks_{query}_{limit_int}"
         cached_data = self.cache.get_from_cache(cache_key, max_age=300)  # 5分キャッシュ
         
         if cached_data:
@@ -47,7 +49,7 @@ class SearchManager:
             return [Track(**item) for item in cached_data]
         
         try:
-            results = sp.search(q=query, limit=limit, type='track')
+            results = sp.search(q=query, limit=limit_int, type='track')
             tracks_data = []
             
             for item in results['tracks']['items']:
@@ -167,5 +169,8 @@ class SearchManager:
         # 完全なクエリ文字列を構築
         query = ' '.join(query_parts)
         
+        # limitを確実にintに変換
+        limit_int = int(limit) if limit is not None else 10
+        
         # 標準の検索関数を使用
-        return self.search_tracks(sp, query, limit) 
+        return self.search_tracks(sp, query, limit_int) 

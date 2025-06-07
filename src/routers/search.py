@@ -12,7 +12,9 @@ router = APIRouter()
 @router.get("/tracks", response_model=List[Track], operation_id="search_tracks")
 async def search_tracks_endpoint(query: str, limit: int = 10, sp: Spotify = Depends(get_spotify_client)):
     """曲を検索"""
-    return get_spotify_tools_instance().search_tracks(sp, query, limit)
+    # limitを確実にintに変換
+    limit_int = int(limit) if limit is not None else 10
+    return get_spotify_tools_instance().search_tracks(sp, query, limit_int)
 
 @router.get("/artists", response_model=List[Artist], operation_id="search_artists")
 async def search_artists_endpoint(query: str, limit: int = 10, sp: Spotify = Depends(get_spotify_client)):
@@ -37,23 +39,24 @@ async def get_multiple_tracks_endpoint(request_body: GetMultipleTracksRequest, s
     """複数の曲情報を一度に取得（バルク処理）"""
     return get_spotify_tools_instance().get_tracks_by_ids(sp, request_body.track_ids)
 
-class SearchWithFiltersRequest(BaseModel):
-    track: Optional[str] = None
-    artist: Optional[str] = None
-    album: Optional[str] = None
-    year: Optional[str] = None
-    genre: Optional[str] = None
-    limit: Optional[int] = 10
 
-@router.post("/tracks/filter", response_model=List[Track], operation_id="search_tracks_with_filters")
-async def search_tracks_with_filters_endpoint(request_body: SearchWithFiltersRequest, sp: Spotify = Depends(get_spotify_client)):
-    """フィルターを使って楽曲を検索"""
+
+@router.get("/tracks/filter", response_model=List[Track], operation_id="search_tracks_with_filters")
+async def search_tracks_with_filters_endpoint(
+    track: Optional[str] = None,
+    artist: Optional[str] = None,
+    album: Optional[str] = None,
+    year: Optional[str] = None,
+    genre: Optional[str] = None,
+    sp: Spotify = Depends(get_spotify_client)
+):
+    """フィルターを使って楽曲を検索（固定で10件取得）"""
     return get_spotify_tools_instance().search_with_filters(
         sp,
-        track=request_body.track,
-        artist=request_body.artist,
-        album=request_body.album,
-        year=request_body.year,
-        genre=request_body.genre,
-        limit=request_body.limit
+        track=track,
+        artist=artist,
+        album=album,
+        year=year,
+        genre=genre,
+        limit=10  # 固定値として設定
     ) 
