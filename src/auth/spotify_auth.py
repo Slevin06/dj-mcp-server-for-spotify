@@ -52,9 +52,9 @@ class SpotifyAuth:
         # 環境変数から認証情報を取得（指定がない場合）
         self.client_id = client_id or os.getenv("SPOTIFY_CLIENT_ID")
         self.client_secret = client_secret or os.getenv("SPOTIFY_CLIENT_SECRET")
-        self.redirect_uri = redirect_uri or os.getenv("SPOTIFY_REDIRECT_URI", "http://127.0.0.1:8000/callback")
+        self.redirect_uri = redirect_uri or os.getenv("SPOTIFY_REDIRECT_URI", "http://127.0.0.1:8000/auth/callback")
         
-        # 必須の認証情報が欠けている場合はエラー
+        # 必須の認証情報が欠けている場合は警告を出し、初期化を続行
         if not all([self.client_id, self.client_secret, self.redirect_uri]):
             missing = []
             if not self.client_id:
@@ -63,7 +63,11 @@ class SpotifyAuth:
                 missing.append("SPOTIFY_CLIENT_SECRET")
             if not self.redirect_uri:
                 missing.append("SPOTIFY_REDIRECT_URI")
-            raise ValueError(f"認証情報が不足しています: {', '.join(missing)}")
+            logger.warning(f"認証情報が不足しています: {', '.join(missing)}。認証機能は利用できません。")
+            self._authenticated = False
+            self._token_info = None
+            self.oauth = None
+            return
         
         # TokenManagerとCacheManagerの初期化
         self.token_manager = TokenManager(token_path)
@@ -126,6 +130,9 @@ class SpotifyAuth:
         Returns:
             str: ユーザーがSpotify認証を行うためのURL
         """
+        if not self.oauth:
+            logger.error("認証情報が設定されていません。認証URLを生成できません。")
+            return None
         auth_url = self.oauth.get_authorize_url()
         logger.info(f"認証URLを生成しました: {auth_url}")
         return auth_url
@@ -139,6 +146,9 @@ class SpotifyAuth:
         Returns:
             bool: 認証成功時にTrue、失敗時にFalse
         """
+        if not self.oauth:
+            logger.error("認証情報が設定されていません。コールバック処理を実行できません。")
+            return False
         try:
             # codeからアクセストークンを取得
             token_info = self.oauth.get_access_token(code, as_dict=True)

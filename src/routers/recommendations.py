@@ -4,7 +4,7 @@ from spotipy import Spotify
 from pydantic import BaseModel
 
 from ..auth.spotify_auth import get_spotify_client
-from ..main import spotify_tools_instance
+from ..dependencies import get_spotify_tools_instance
 from ..models import Track, Playlist, RecommendationsResponse # Pydanticモデルをインポート
 
 router = APIRouter()
@@ -12,7 +12,7 @@ router = APIRouter()
 @router.get("/genres", response_model=List[str], operation_id="get_available_genres")
 async def get_available_genres_endpoint(sp: Spotify = Depends(get_spotify_client)):
     """利用可能なレコメンデーションジャンルシードを取得する"""
-    return spotify_tools_instance.get_available_genres(sp)
+    return get_spotify_tools_instance().get_available_genres(sp)
 
 class RecommendationRequestBase(BaseModel):
     limit: Optional[int] = 20
@@ -50,7 +50,7 @@ async def get_recommendations_by_seed_endpoint(
     if not request_body.seed_artists and not request_body.seed_genres and not request_body.seed_tracks:
         raise HTTPException(status_code=400, detail="At least one seed (artists, genres, or tracks) must be provided.")
     
-    return spotify_tools_instance.get_recommendations(
+    return get_spotify_tools_instance().get_recommendations(
         sp,
         limit=request_body.limit,
         market=request_body.market,
@@ -71,7 +71,7 @@ class GetRecommendationsByMoodRequest(RecommendationRequestBase):
 @router.post("/by-mood", response_model=List[Track], operation_id="get_recommendations_by_mood")
 async def get_recommendations_by_mood_endpoint(request_body: GetRecommendationsByMoodRequest, sp: Spotify = Depends(get_spotify_client)):
     """気分に基づいてレコメンデーションを取得"""
-    return spotify_tools_instance.get_recommendations_by_mood(
+    return get_spotify_tools_instance().get_recommendations_by_mood(
         sp,
         mood=request_body.mood,
         limit=request_body.limit,
@@ -92,7 +92,7 @@ class GetRecommendationsByCategoryRequest(RecommendationRequestBase):
 async def get_recommendations_by_category_endpoint(request_body: GetRecommendationsByCategoryRequest, sp: Spotify = Depends(get_spotify_client)):
     """カテゴリ（ジャンル）に基づいてレコメンデーションを取得"""
     # RecommendationManager に by_category がないので、get_recommendations を seed_genres を使って呼び出す
-    return spotify_tools_instance.get_recommendations(
+    return get_spotify_tools_instance().get_recommendations(
         sp,
         seed_genres=[request_body.category_id], # category_idをseed_genresとして渡す
         limit=request_body.limit,
@@ -112,7 +112,7 @@ class GetRecommendationsByArtistRequest(RecommendationRequestBase):
 async def get_recommendations_by_artist_endpoint(request_body: GetRecommendationsByArtistRequest, sp: Spotify = Depends(get_spotify_client)):
     """アーティストに基づいてレコメンデーションを取得"""
     # RecommendationManager に by_artist がないので、get_recommendations を seed_artists を使って呼び出す
-    return spotify_tools_instance.get_recommendations(
+    return get_spotify_tools_instance().get_recommendations(
         sp,
         seed_artists=[request_body.artist_id], # artist_idをseed_artistsとして渡す
         limit=request_body.limit,
@@ -149,7 +149,7 @@ async def create_playlist_from_recommendations_endpoint(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"ユーザープロファイル取得エラー: {str(e)}")
 
-    return spotify_tools_instance.create_playlist_from_recommendations(
+    return get_spotify_tools_instance().create_playlist_from_recommendations(
         sp,
         user_id=user_id,
         name=request_body.name,
@@ -187,7 +187,7 @@ async def play_recommendations_endpoint(request_body: PlayRecommendationsRequest
     })
 
     if request_body.mood:
-        tracks_to_play = spotify_tools_instance.get_recommendations_by_mood(
+        tracks_to_play = get_spotify_tools_instance().get_recommendations_by_mood(
             sp,
             mood=request_body.mood,
             seed_artists=request_body.seed_artists,
@@ -196,7 +196,7 @@ async def play_recommendations_endpoint(request_body: PlayRecommendationsRequest
             **common_params
         )
     elif request_body.seed_artists or request_body.seed_genres or request_body.seed_tracks:
-        tracks_to_play = spotify_tools_instance.get_recommendations(
+        tracks_to_play = get_spotify_tools_instance().get_recommendations(
             sp,
             seed_artists=request_body.seed_artists,
             seed_genres=request_body.seed_genres,
@@ -212,6 +212,6 @@ async def play_recommendations_endpoint(request_body: PlayRecommendationsRequest
     track_uris = [f"spotify:track:{track.id}" for track in tracks_to_play]
     
     try:
-        return spotify_tools_instance.player_manager.play(sp, uris=track_uris, device_id=request_body.device_id)
+        return get_spotify_tools_instance().player_manager.play(sp, uris=track_uris, device_id=request_body.device_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"レコメンデーションの再生に失敗しました: {str(e)}") 

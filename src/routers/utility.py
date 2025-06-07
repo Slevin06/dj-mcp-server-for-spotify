@@ -1,11 +1,11 @@
 # src/routers/utility.py
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from typing import List, Dict, Any, Optional
 from spotipy import Spotify
 from pydantic import BaseModel, Field
 
 from ..auth.spotify_auth import get_spotify_client
-from ..main import spotify_tools_instance # mainからインポート
+from ..dependencies import get_spotify_tools_instance # mainからインポート
 from .. import __version__ # ルートの __init__.py からバージョン情報をインポート
 from ..models import Track, Artist # Pydanticモデルをインポート
 

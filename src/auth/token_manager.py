@@ -55,6 +55,11 @@ class TokenManager:
             logger.info("トークンファイルが存在しません")
             return None
         
+        # ディレクトリではなくファイルかチェック
+        if os.path.isdir(self.token_file):
+            logger.warning(f"トークンパスがディレクトリです: {self.token_file}")
+            return None
+        
         try:
             with open(self.token_file, 'r') as f:
                 token_info = json.load(f)

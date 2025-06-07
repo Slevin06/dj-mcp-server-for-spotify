@@ -9,8 +9,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # spotify_token.json をホストPCの ./tokens ディレクトリに永続化
-      - ./tokens/spotify_token.json:/app/tokens/spotify_token.json
+      # tokens ディレクトリ全体をマウント（tokensフォルダが空でも問題ない）
+      - ./tokens:/app/tokens
     env_file:
       - .env
     restart: unless-stopped

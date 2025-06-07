@@ -1,17 +1,60 @@
 # 環境変数と認証情報
 .env
 spotify_token.json
+tokens/
+.cache
 
 # Python関連
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 venv/
+.venv/
+env/
+ENV/
+.env.local
+.env.*.local
+
+# テスト・カバレッジ関連
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.cache
+.mypy_cache/
+
+# ログファイル
+*.log
+logs/
+
+# 一時ファイル
+tmp/
+temp/
+*.tmp
+*.temp
+
+# キャッシュディレクトリ
+cache/
+.cache/
 
 # エディタ関連
 .vscode/
 .cursor/
+.cursorignore
 .idea/
 
-# システム関連
+# OS関連
 .DS_Store
-Thumbs.db 
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Docker関連
+.docker/
+
+# その他の設定ファイル
+.python-version
+pip-log.txt
+pip-delete-this-directory.txt 

@@ -21,17 +21,8 @@ app = FastAPI(
 )
 
 # グローバルインスタンスの生成
-spotify_tools_instance = SpotifyTools() 
-
-# MCPサーバーの設定
-mcp = FastApiMCP(
-    app,
-    name="Spotify Assistant for DJ MCP Server", # MCPサーバー名を修正
-    description="Spotifyの各種機能をMCP経由で操作します。", # MCPサーバーの説明を追加
-    prefix="/mcp", # MCPサーバーのエンドポイントプレフィックス
-    include_model_validation_error_detail=True, # バリデーションエラー詳細を含める
-    # describe_full_response_schema=True # デフォルトTrueなので明示不要の場合も
-)
+from .dependencies import init_spotify_tools_instance
+spotify_tools_instance = init_spotify_tools_instance() 
 
 # 各ルーターをアプリケーションに登録
 # プレフィックスとタグを指定してグループ化
@@ -41,6 +32,19 @@ app.include_router(search.router, prefix="/search", tags=["Search"])
 app.include_router(player.router, prefix="/player", tags=["Player Control"])
 app.include_router(recommendations.router, prefix="/recommendations", tags=["Recommendations"])
 app.include_router(utility.router, prefix="/utility", tags=["Utility"]) # プレフィックスを /utility に変更
+
+# 🎵 MCPサーバーの設定とマウント
+# FastApiMCPは既存のFastAPIエンドポイントを自動的にMCPツールとして公開します
+mcp = FastApiMCP(
+    app,
+    name="Spotify Assistant for DJ MCP Server", # MCPサーバー名
+    description="Spotifyの各種機能をMCP経由で操作します。楽曲検索、再生制御、プレイリスト管理などが可能です。", # MCPサーバーの説明
+    # 特定のタグのエンドポイントのみをMCPツールとして公開
+    include_tags=["Search", "Player Control", "Playlists", "Authentication", "Utility"],
+    # レスポンススキーマを詳細に含める
+    describe_all_responses=True,
+    describe_full_response_schema=True
+)
 
 # MCPサーバーをマウント
 mcp.mount()
@@ -54,15 +58,5 @@ async def root_redirect():
 
 if __name__ == "__main__":
     import uvicorn
-    # SSL証明書とキーのパス (自己署名証明書の場合)
-    # ssl_keyfile = "./certs/key.pem"
-    # ssl_certfile = "./certs/cert.pem"
-
-    # uvicorn.run(
-    # app,
-    # host="0.0.0.0",
-    # port=8000,
-    # ssl_keyfile=ssl_keyfile if os.path.exists(ssl_keyfile) else None,
-    # ssl_certfile=ssl_certfile if os.path.exists(ssl_certfile) else None
-    # )
+    # FastApiMCPはHTTPサーバーとして動作し、MCPプロトコルを/mcpエンドポイントで提供
     uvicorn.run(app, host="0.0.0.0", port=8000) 
