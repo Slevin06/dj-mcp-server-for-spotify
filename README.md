@@ -1,8 +1,8 @@
 # 🎵 DJ Spotify MCP Server
 
-**FastMCP（HTTP）方式で構築された Spotify Web API の MCP（Model Context Protocol）サーバー**
+**FastAPI + FastAPI-MCP で構築された Spotify Web API の MCP（Model Context Protocol）サーバー**
 
-AI アシスタント（Claude、Cursor など）から自然言語で Spotify を操作できる個人開発プロジェクトです。FastMCP フレームワークを使用して HTTP 経由で MCP プロトコルを提供し、すべての Spotify 機能が AI から利用可能になります。
+AI アシスタント（Claude、Cursor など）から自然言語で Spotify を操作できる個人開発プロジェクトです。FastAPI-MCP を使用して HTTP 経由で MCP プロトコルを提供し、すべての Spotify 機能が AI から利用可能になります。
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/Slevin06/dj-mcp-server-for-spotify)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org)
@@ -11,7 +11,7 @@ AI アシスタント（Claude、Cursor など）から自然言語で Spotify �
 
 ## ✨ 特徴
 
-- 🚀 **FastMCP（HTTP）方式**: 安定した HTTP 通信による MCP プロトコル提供
+- 🚀 **FastAPI-MCP**: FastAPI エンドポイントの自動 MCP ツール化による安定した HTTP 通信
 - 🎵 **包括的な Spotify 機能**: 検索、再生、プレイリスト管理、レコメンデーションなど
 - 🤖 **AI アシスタント対応**: Claude、Cursor などから自然言語で操作
 - 🔐 **OAuth2.0 認証**: Spotify 公式 API による安全な認証
@@ -57,7 +57,7 @@ SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/auth/callback
 ### 3. サーバー起動
 
 ```bash
-# FastMCP サーバーを起動
+# FastAPI MCP サーバーを起動
 ./run_fastapi_mcp.sh
 ```
 
@@ -69,7 +69,7 @@ SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/auth/callback
 
 ### 4. AI アシスタントの設定
 
-**~/.cursor/mcp.json** に以下を追加：
+**Cursor の場合 ~/.cursor/mcp.json**、**Claude Desktop の場合 ~/.claude_desktop_config.json** に以下を追加：
 
 ```json
 {
@@ -296,9 +296,12 @@ AI: ✅ プレイリストを作成しました！
 ```
 dj-mcp-server-for-spotify/
 ├── src/                          # メインソースコード
-│   ├── main.py                  # FastMCP メインアプリケーション
+│   ├── main.py                  # FastAPI + MCP メインアプリケーション
+│   ├── spotify_client.py        # Spotify ツールファクトリー（シンプル）
 │   ├── auth/                    # 認証関連
-│   │   └── spotify_auth.py      # Spotify OAuth2 実装
+│   │   ├── spotify_auth.py      # Spotify OAuth2 実装
+│   │   ├── token_manager.py     # トークン管理
+│   │   └── cache_manager.py     # 認証キャッシュ
 │   ├── routers/                 # API エンドポイント群
 │   │   ├── authentication.py   # 認証エンドポイント
 │   │   ├── playlists.py        # プレイリスト操作
@@ -306,20 +309,26 @@ dj-mcp-server-for-spotify/
 │   │   ├── player.py           # 再生コントロール
 │   │   ├── recommendations.py  # レコメンデーション
 │   │   └── utility.py          # ユーティリティ
-│   ├── spotify_features/        # 機能実装
-│   │   ├── playlists.py        # プレイリスト管理
-│   │   ├── search.py           # 検索機能
-│   │   ├── player.py           # 再生制御
-│   │   └── recommendations.py  # レコメンデーション
-│   ├── dependencies.py         # 依存性注入
-│   ├── spotify_tools.py        # Spotify ツール統合
+│   ├── spotify_features/        # 機能実装マネージャー
+│   │   ├── playlist_manager.py  # プレイリスト管理
+│   │   ├── search_manager.py    # 検索機能
+│   │   ├── artist_manager.py    # アーティスト情報
+│   │   ├── player_manager.py    # 再生制御
+│   │   ├── recommendation_manager.py # レコメンデーション
+│   │   ├── cache_handler.py     # API キャッシュ処理
+│   │   └── rate_limit_handler.py # レート制限管理
+│   ├── spotify_tools.py        # Spotify ツール統合ファサード
 │   └── models.py               # Pydantic モデル
 ├── tokens/                      # 認証トークン保存
-├── cache/                       # API キャッシュ
+├── cache/                       # 二層キャッシュシステム
+│   ├── auth/                   # 認証関連キャッシュ
+│   └── spotify_api_cache/      # API レスポンスキャッシュ
 ├── docs/                        # ドキュメント
+│   └── ai_interaction_rules.mdc # AI インタラクションルール
 ├── .env                        # 環境変数（作成要）
 ├── requirements.txt            # Python 依存関係
 ├── run_fastapi_mcp.sh         # サーバー起動スクリプト
+├── run.sh / run.bat           # 環境セットアップ + 起動スクリプト
 └── README.md                  # このファイル
 ```
 
@@ -327,7 +336,7 @@ dj-mcp-server-for-spotify/
 
 - **Python 3.11+**: 基盤プログラミング言語
 - **FastAPI**: 高性能 Web API フレームワーク
-- **FastMCP**: MCP プロトコル実装
+- **FastAPI-MCP**: FastAPI エンドポイントの自動 MCP ツール化
 - **Spotipy**: Spotify Web API Python ライブラリ
 - **Pydantic**: データバリデーション・設定管理
 - **Uvicorn**: ASGI サーバー
@@ -428,6 +437,15 @@ curl http://localhost:8000/auth/status
 
 ## 📈 今後の予定
 
+### アーキテクチャ改善
+- [x] **Phase 1完了**: レガシーコード削除（mcp_server.py, spotify_mcp_server.py除去、依存関係整理）
+- [x] **Phase 2完了**: 依存性注入簡素化（dependencies.py → spotify_client.py、LRUキャッシュ導入）
+- [ ] **Phase 3**: マネージャー統合・エラーハンドリング統一（スキップ済み）
+- [ ] **Phase 4**: 監視・テスト・ドキュメント強化（将来対応）
+
+**リファクタリング成果**: 13KB のレガシーコード削除、43%のコード簡素化を実現し、保守性を大幅に向上。
+
+### 機能拡張
 - [ ] Docker Compose 対応完全化
 - [ ] レコメンデーション機能の拡張
 - [ ] プレイリスト画像設定機能
