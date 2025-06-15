@@ -57,4 +57,7 @@ Thumbs.db
 # その他の設定ファイル
 .python-version
 pip-log.txt
-pip-delete-this-directory.txt 
+pip-delete-this-directory.txt
+
+# Claude関連フォルダ
+.claude/
