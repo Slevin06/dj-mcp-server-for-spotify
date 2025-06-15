@@ -5,7 +5,7 @@ from spotipy import Spotify
 from pydantic import BaseModel, Field
 
 from ..auth.spotify_auth import get_spotify_client
-from ..spotify_client import get_spotify_tools_instance # mainからインポート
+from ..dependencies import get_spotify_tools_instance # mainからインポート
 from .. import __version__ # ルートの __init__.py からバージョン情報をインポート
 from ..models import Track, Artist # Pydanticモデルをインポート
 

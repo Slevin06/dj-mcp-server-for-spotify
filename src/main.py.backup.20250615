@@ -20,9 +20,9 @@ app = FastAPI(
     version="1.0.0" # __init__.py と合わせる
 )
 
-# SpotifyToolsインスタンスの取得
-from .spotify_client import get_spotify_tools
-spotify_tools_instance = get_spotify_tools() 
+# グローバルインスタンスの生成
+from .dependencies import init_spotify_tools_instance
+spotify_tools_instance = init_spotify_tools_instance() 
 
 # 各ルーターをアプリケーションに登録
 # プレフィックスとタグを指定してグループ化
